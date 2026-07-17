@@ -1,34 +1,26 @@
 #include <iostream>
-
-class BaseGPU {
-public:
-    BaseGPU() { std::cout << "【基类】构造" << std::endl; }
-    
-    // 💡 场景 A：普通析构函数（没有加 virtual）
-    ~BaseGPU() { std::cout << "【基类】析构销毁" << std::endl; }
-};
-
-class SuperH100 : public BaseGPU {
-private:
-    int* gpuMemory; // 子类独有的指针，指向堆区的算力缓冲区
-public:
-    SuperH100() {
-        std::cout << "【子类】构造：在堆区申请 1024 字节缓冲区" << std::endl;
-        gpuMemory = new int[256]; // 申请堆内存
-    }
-    
-    ~SuperH100() {
-        std::cout << "【子类】析构：释放 1024 字节缓冲区！" << std::endl;
-        delete[] gpuMemory; // 释放堆内存
-    }
-};
+#include <vector>
 
 int main() {
-    std::cout << "--- 准备用父类指针管理子类对象 ---" << std::endl;
-    BaseGPU* gpu = new SuperH100();
+    std::cout << "--- 测试 vector 扩容的地址突变 ---" << std::endl;
 
-    std::cout << "\n--- 准备使用父类指针 delete 对象 ---" << std::endl;
-    delete gpu; // 极其高频的销毁行为
+    std::vector<int> v;
+
+    // 观察随着元素插入，size、capacity 以及首元素物理地址的变化
+    for (int i = 0; i < 10; ++i) {
+        v.push_back(i);
+        
+        // 打印当前的 size, capacity 以及第一个元素的内存地址
+        std::cout << "放入元素 " << i 
+                  << " | size = " << v.size() 
+                  << " | capacity = " << v.capacity();
+        
+        if (!v.empty()) {
+            std::cout << " | 首元素物理地址 = " << &v[0] << std::endl;
+        } else {
+            std::cout << std::endl;
+        }
+    }
 
     return 0;
 }
